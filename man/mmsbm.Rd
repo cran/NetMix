@@ -4,10 +4,20 @@
 \alias{mmsbm}
 \title{Dynamic mixed-membership stochastic blockmodel with covariates}
 \usage{
-mmsbm(formula.dyad, formula.monad = ~1, senderID, receiverID,
-  nodeID = NULL, timeID = NULL, data.dyad, data.monad = NULL,
-  n.blocks, n.hmmstates = 1, directed = TRUE,
-  missing = "indicator method", mmsbm.control = list())
+mmsbm(
+  formula.dyad,
+  formula.monad = ~1,
+  senderID,
+  receiverID,
+  nodeID = NULL,
+  timeID = NULL,
+  data.dyad,
+  data.monad = NULL,
+  n.blocks,
+  n.hmmstates = 1,
+  directed = TRUE,
+  mmsbm.control = list()
+)
 }
 \arguments{
 \item{formula.dyad}{A \code{formula} object. The variable in \code{data.dyad} that contains 
@@ -50,63 +60,76 @@ to 1 (i.e. no HMM).}
 
 \item{directed}{Boolean. Is the network directed? Defaults to \code{TRUE}.}
 
-\item{missing}{Means of handling missing data. One of "indicator method" (default) or "listwise deletion".}
-
 \item{mmsbm.control}{A named list of optional algorithm control parameters.
 \describe{
+   \item{seed}{Integer value. Seed the RNG. By default, a random seed is generated and returned for reproducibility purposes.}
    \item{spectral}{Boolean. Type of initialization algorithm for mixed-membership vectors in static case. If \code{TRUE} (default),
                use spectral clustering with degree correction; otherwise, use kmeans algorithm.}
-   \item{init.dyn.gibbs}{Boolean. Should a collapsed Gibbs sampler of non-regression mmsbm be used to initialize
-               each time period when multiple time periods are observed (instead of a spectral or simple kmeans initialization)?
-               Setting to \code{TRUE} will be result in faster estimation that is very sensitive to
-               choice of alpha (see below)}            
+   \item{init_gibbs}{Boolean. Should a collapsed Gibbs sampler of non-regression mmsbm be used to initialize
+               mixed-membership vectors, instead of a spectral or simple kmeans initialization?
+               Setting to \code{TRUE} will result in slower initialization and faster model estimation. When \code{TRUE}, results are typically very sensitive to
+               choice of alpha (see below).}            
    \item{alpha}{Numeric positive value. Concentration parameter for collapsed Gibbs sampler to find initial
-                mixed-membership values in dynamic case when \code{init.dyn.gibbs=TRUE}. Defaults to 0.5}            
-   \item{seed}{RNG seed. Defaults to \code{NULL}, which does not seed the RNG}            
-   \item{em_iter}{Number of maximum iterations in variational EM. Defaults to 5e3}
-   \item{opt_iter}{Number of maximum iterations of BFGS in M-step. Defaults to 10e3}
+                mixed-membership values when \code{init_gibbs=TRUE}. Defaults to 1.0.}            
+   \item{missing}{Means of handling missing data. One of "indicator method" (default) or "listwise deletion".}       
+   \item{em_iter}{Number of maximum iterations in variational EM. Defaults to 5e3.}
+   \item{opt_iter}{Number of maximum iterations of BFGS in M-step. Defaults to 10e3.}
+   \item{hessian}{Boolean indicating whether the Hessian matrix of regression coefficients should e returned. Defaults to \code{TRUE}.}
    \item{mu_b}{Numeric vector with two elements: prior mean of blockmodel's main diagonal elements, and
-               and prior mean of blockmodel's offdiagonal elements. Defaults to \code{c(5.0, -5.0)}}
+               and prior mean of blockmodel's offdiagonal elements. Defaults to \code{c(5.0, -5.0)}.}
    \item{var_b}{Numeric vector with two positive elements: prior variance of blockmodel's main diagonal elements, and
-               and prior variance of blockmodel's offdiagonal elements. Defaults to \code{c(1.0, 1.0)}}
-   \item{var_beta}{Numeric positive value. (Gaussian) Prior variance of monadic coefficients. Defaults to 5.0.}
-   \item{var_gamma}{Numeric positive value. (Gaussian) Prior variance of dyadic coefficients. Defaults to 5.0.}
-   \item{eta}{Numeric positive value. Concentration hyper-parameter for HMM. Defaults to 10.3}
+               and prior variance of blockmodel's offdiagonal elements. Defaults to \code{c(1.0, 1.0)}.}
+   \item{mu_beta}{Either single numeric value, in which case the same prior mean is applied to all monadic coefficients, or
+                  an array with that is \code{npredictors} by \code{n.blocks} by \code{n.hmmstates}, where \code{npredictors}
+                  is the number of monadic predictors for which a prior mean is being set (prior means need not be set for all)
+                  predictors). The rows in the array should be named to identify which variables a prior mean is being set for.
+                  Defaults to a common prior mean of 0.0 for all monadic coefficients.}            
+   \item{var_beta}{See \code{mu_beta}. Defaults to a single common prior variance of 1.0 for all monadic coefficients.}
+   \item{mu_gamma}{Either a single numeric value, in which case the same prior mean is applied to all dyadic coefficients, or
+                   a named vector of numeric values (with names corresponding to the name of the variable 
+                  for which a prior mean is being set). Defaults to a copmmon prior mean of 0.0 for all dyadic coefficients.}
+   \item{var_gamma}{See \code{mu_gamma}. Defaults to a single common prior variance of 1.0 for all dyadic coefficients.}
+   \item{eta}{Numeric positive value. Concentration hyper-parameter for HMM. Defaults to 10.3.}
+   \item{se_sim}{Number of samples from variational posterior of latent variables on which approximation to variance-covariance
+                 matrices are based. Defaults to 10.}
+   \item{dyad_vcov_samp}{Number of dyads to sample in computation of variance-covariance of dyadic and blockmodel parameters. 
+                         Defaults to 1000.}
    \item{phi_init_t}{Matrix, \code{n.blocks} by total number of nodes across years. Optional initial values for variational
-                  parameters for mixed-membership vectors. Column names must be of the form \code{nodeid\@year}
-                  }
+                  parameters for mixed-membership vectors. Column names must be of the form \code{nodeid\@year }.}
    \item{kappa_init_t}{Matrix, \code{n.hmmstates} by number of years. Optional initial values for variational 
                   parameters for state probabilities.}
    \item{b_init_t}{Matrix, \code{n.blocks} by \code{n.blocks}. Optional initial values for blockmodel.}
-   \item{beta_init}{Array, predictors by \code{n.blocks} by \code{n.hmmstates}. Optional initial values for monadic coefficients.}
+   \item{beta_init}{Array, \code{predictors} by \code{n.blocks} by \code{n.hmmstates}. Optional initial values for monadic coefficients. If }
    \item{gamma_init}{Vector. Optional initial values for dyadic coefficients.}
    \item{permute}{Boolean. Should all permutations be tested to realign initial block models in dynamic case? If \code{FALSE}, realignment is 
                  done via faster graph matching algorithm, but may not be exact. Defaults to \code{TRUE}.}
-   \item{threads}{Numeric integer. Number of available cores for paralellization. Defaults to 4}
-   \item{conv_tol}{Numeric value. Absolute tolerance for VI convergence. Defaults to 1e-4}
-   \item{verbose}{Boolean. Should extra information be printed as model iterates? Defaults to FALSE}
+   \item{conv_tol}{Numeric value. Absolute tolerance for VI convergence. Defaults to 1e-3.}
+   \item{verbose}{Boolean. Should extra information be printed as model iterates? Defaults to FALSE.}
    }}
 }
 \value{
 Object of class \code{mmsbm}. List with named components:
     \describe{
       \item{MixedMembership}{Matrix of variational posterior of mean of mixed-membership vectors. \code{nodes} by \
-                             \code{n.groups}}
+                             \code{n.groups}.}
       \item{BlockModel}{\code{n.groups} by \code{n.groups} matrix of estimated tie log-odds between members
                         of corresponding latent groups. The blockmodel.}
+      \item{vcov_blockmodel}{If \code{hessian=TRUE}, variance-covariance matrix of parameters in blockmodel, ordered in column-major order.}
       \item{MonadCoef}{Array of estimated coefficient values for monadic covariates. Has \code{n.groups} columns,
                        and \code{n.hmmstates} slices.}
-      \item{DyadCoef}{Vector estimated coefficient values for dyadic covariates}
-      \item{TransitionKernel}{Matrix of estimated HMM transition probabilities}
+      \item{vcov_monad}{If \code{hessian=TRUE}, variance-covariance matrix of monadic coefficients.}                  
+      \item{DyadCoef}{Vector estimated coefficient values for dyadic covariates.}
+      \item{vcov_dyad}{If \code{hessian=TRUE}, variance-covariance matrix of dyadic coefficients.}
+      \item{TransitionKernel}{Matrix of estimated HMM transition probabilities.}
       \item{Kappa}{Matrix of marginal probabilities of being in an HMM state at any given point in time. 
-                   \code{n.hmmstates} by years (or whatever time interval networks are observed at)}
-      \item{LowerBound}{Value of the lower bound at final iteration}
-      \item{niter}{Final number of VI iterations}
-      \item{converged}{Convergence indicator; zero indicates failure to converge}
-      \item{NodeIndex}{Order in which nodes are stored in all return objects}
-      \item{monadic.data, dyadic.data, directed}{Original values of parameters used during estimation}
-      \item{forms}{Values of formal arguments passed in original function call}
-      \item{call}{Original (unevaluated) call}
+                   \code{n.hmmstates} by years (or whatever time interval networks are observed at).}
+      \item{niter}{Final number of VI iterations.}
+      \item{converged}{Convergence indicator; zero indicates failure to converge.}
+      \item{NodeIndex}{Order in which nodes are stored in all return objects.}
+      \item{monadic.data, dyadic.data}{Model frames used during estimation (stripped of attributes).}
+      \item{forms}{Values of selected formal arguments used by other methods.}
+      \item{seed}{The value of RNG seed used during estimation.}
+      \item{call}{Original (unevaluated) function call.}
     }
 }
 \description{
@@ -119,7 +142,8 @@ library(NetMix)
 data("lazega_dyadic")
 data("lazega_monadic")
 ## Estimate model with 2 groups
-set.seed(123)
+## Setting to `hessian=TRUE` increases computation time
+## but is needed if standard errors are to be computed. 
 lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
                       ~  School + Practice + Status,
                       senderID = "Lawyer1",
@@ -127,9 +151,11 @@ lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
                       nodeID = "Lawyer",
                       data.dyad = lazega_dyadic,
                       data.monad = lazega_monadic,
-                      n.blocks = 2)
+                      n.blocks = 2,
+                      mmsbm.control = list(seed = 123,
+                                           hessian = FALSE))
 
 }
 \author{
-Kosuke Imai (imai@harvard.edu), Tyler Pratt (tyler.pratt@yale.edu), Santiago Olivella (olivella@unc.edu)
+Santiago Olivella (olivella@unc.edu), Adeline Lo (aylo@wisc.edu), Tyler Pratt (tyler.pratt@yale.edu), Kosuke Imai (imai@harvard.edu)
 }

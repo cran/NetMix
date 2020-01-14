@@ -4,8 +4,7 @@
 \alias{head.mmsbm}
 \title{Identify nodes with most frequent membership in latent groups}
 \usage{
-\method{head}{mmsbm}(x, n = 6, t = NULL, node = TRUE,
-  t.correct = FALSE, ...)
+\method{head}{mmsbm}(x, n = 6, t = NULL, node = TRUE, t.correct = FALSE, ...)
 }
 \arguments{
 \item{x}{An object of class \code{mmsbm}, a result of a call to \code{mmsbm}.}
@@ -21,7 +20,7 @@
 \item{...}{Currently ignored}
 }
 \value{
-List of length \code{n.groups}.  Each entry contains a sorted vector of average latent membership probabilities of length \code{n}.
+List of length \code{n.blocks}.  Each entry contains a sorted vector of average latent membership probabilities of length \code{n}.
 }
 \description{
 The function lists the nodes (optionally, node-time periods) that most frequently instantiate membership in each latent group.
@@ -40,12 +39,14 @@ lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
                       nodeID = "Lawyer",
                       data.dyad = lazega_dyadic,
                       data.monad = lazega_monadic,
-                      n.blocks = 2)
+                      n.blocks = 2,
+                      mmsbm.control = list(seed = 123,
+                                           hessian = FALSE))
 
 ## Show top 6 lawyers in each estimated latent block
 head(lazega_mmsbm)
 
 }
 \author{
-Kosuke Imai (imai@harvard.edu), Tyler Pratt (tyler.pratt@yale.edu), Santiago Olivella (olivella@unc.edu)
+Santiago Olivella (olivella@unc.edu), Adeline Lo (aylo@wisc.edu), Tyler Pratt (tyler.pratt@yale.edu), Kosuke Imai (imai@harvard.edu)
 }

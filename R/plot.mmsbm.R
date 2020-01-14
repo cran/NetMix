@@ -16,7 +16,7 @@
 #' 
 #' @method plot mmsbm
 #'
-#' @author Kosuke Imai (imai@@harvard.edu), Tyler Pratt (tyler.pratt@@yale.edu), Santiago Olivella (olivella@@unc.edu)
+#' @author Santiago Olivella (olivella@@unc.edu), Adeline Lo (aaylo@@wisc.edu), Tyler Pratt (tyler.pratt@@yale.edu), Kosuke Imai (imai@@harvard.edu)
 #' 
 #' @examples 
 #' library(NetMix)
@@ -24,7 +24,6 @@
 #' data("lazega_dyadic")
 #' data("lazega_monadic")
 #' ## Estimate model with 2 groups
-#' set.seed(123)
 #' lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
 #'                       ~  School + Practice + Status,
 #'                       senderID = "Lawyer1",
@@ -32,7 +31,9 @@
 #'                       nodeID = "Lawyer",
 #'                       data.dyad = lazega_dyadic,
 #'                       data.monad = lazega_monadic,
-#'                       n.blocks = 2)
+#'                       n.blocks = 2,
+#'                       mmsbm.control = list(seed = 123,
+#'                                            hessian = FALSE))
 #' 
 #' ## Plot blockmodel as network
 #' plot(lazega_mmsbm)
@@ -47,61 +48,35 @@ plot.mmsbm <- function(x, type="groups", FX=NULL, ...){ # network graph showing 
            call. = FALSE)
     }
   }
-  if(type=="blockmodel"){
-    mode <- ifelse(eval(x$forms$directed), "directed", "undirected")
-    v.size <- rowMeans(x$MixedMembership)
-    
-    bm <- x$BlockModel
-    if(mode!="directed") {
-      bm[upper.tri(bm)] <- NA
-    }
-    
-    dm <- data.frame(Sender = rep(rownames(x$BlockModel), times = x$n_blocks),
-                     Receiver = rep(colnames(x$BlockModel), each = x$n_blocks),
-                     Val = plogis(c(bm)),
-                     Height = rep(v.size*(x$n_blocks-0.35), x$n_blocks),
-                     Width = rep(v.size*(x$n_blocks-0.35), each=x$n_blocks))
-    
-    dm <- dm[complete.cases(dm),]
-    
-    dm$Sender  <- factor(dm$Sender, levels=rev(rownames(x$BlockModel)))
-    
-    return(ggplot2::ggplot(ggplot2::aes_string(y = "Sender", x ="Receiver", 
-                                               fill="Val", width="Width", height="Height"),
-                    data = dm) + 
-      ggplot2::geom_tile(color = "white") + ggplot2::theme_bw()+
-      ggplot2::scale_size(guide='none') +
-      ggplot2::scale_fill_gradient2(low = "#deebf7", mid = "#9ecae1", high = "#3182bd",
-                           midpoint = 0.5, limit = c(0,1), name="Edge\nProbability"))
-  }
   
   if(type=="groups"){
-    colRamp <- colorRamp(c("#ffffcc","#fd8d3c","#800026"))
-    mode <- ifelse(eval(x$forms$directed), "directed", "undirected")
+    colRamp <- colorRamp(c("#DCDCDC","#808080","#000000"))
+    g.mode <- ifelse(x$forms$directed, "directed", "undirected")
     adj_mat <- x$BlockModel
     dimnames(adj_mat) <- list(paste("G",1:nrow(adj_mat), sep=""),
                               paste("G", 1:ncol(adj_mat), sep=""))
-    block.G <- igraph::graph.adjacency(plogis(adj_mat), mode=mode, weighted=TRUE)
+    block.G <- igraph::graph.adjacency(plogis(adj_mat), mode=g.mode, weighted=TRUE)
     e.weight <- (1/diff(range(igraph::E(block.G)$weight))) * (igraph::E(block.G)$weight - max(igraph::E(block.G)$weight)) + 1
     e.cols <- rgb(colRamp(e.weight), maxColorValue = 255)
+    times.arg <- if(g.mode == "directed") {
+      x$n_blocks
+    } else {
+      rev(seq_len(x$n_blocks))
+    }
     v.size <- rowMeans(x$MixedMembership)*100 + 20
-    opar <- par(mar=c(0,0,0,.05)+1.0)
-    on.exit(par(opar), add = TRUE)
-    graphics::layout(matrix(1:2,ncol=2), widths = c(2,1), heights = c(1,1))
-    on.exit(graphics::layout(matrix(1,ncol=1), widths = c(1), heights = c(1)), add = TRUE)
+    radian.rescale <- function(x, start=0, direction=1) {
+      c.rotate <- function(x) (x + start) %% (2 * pi) * direction
+      c.rotate(scales::rescale(x, c(0, 2 * pi), range(x)))
+    }
+    loop.rads <- radian.rescale(x=1:x$n_blocks, direction=-1, start=0)
+    loop.rads <- rep(loop.rads, times = times.arg)
     igraph::plot.igraph(block.G, main = "",
-         edge.width=4, edge.color=e.cols,  edge.curved = x$directed, edge.arrow.size = .65,
-         vertex.size=v.size, vertex.color="gray80", vertex.frame.color="black",
-         vertex.label.font=2, vertex.label.cex=1, vertex.label.color="black",
-         layout = igraph::layout_with_graphopt)
-    par(mar=c(5, 0, 5, 5) + 0.1)
-    legend_image <- as.raster(matrix(rgb(colRamp(seq(1,0,length.out=50)), maxColorValue = 255), ncol=1))
-    plot(c(0,2.0),c(0.3,.7),type = 'n', axes = FALSE ,xlab = '', ylab = '')
-    title('Edge\nprobability', cex.main=0.9, adj=0,font=2)
-    text(x=1.5, pos = 4, offset = 0.25, y = seq(0.3,.7,length.out = 5), labels = seq(round(min(igraph::E(block.G)$weight),2),
-                                                             round(max(igraph::E(block.G)$weight),2),
-                                                             length.out =5), cex = 0.75, font=2)
-    rasterImage(legend_image, 0, 0.3, 1, 0.7)
+                        edge.width=4, edge.color=e.cols,  edge.curved = x$forms$directed, edge.arrow.size = 0.65,
+                        edge.loop.angle = loop.rads,
+                        vertex.size=v.size, vertex.color="white", vertex.frame.color="black",
+                        vertex.label.font=2, vertex.label.cex=1, vertex.label.color="black",
+                        layout = igraph::layout_in_circle)
+    .bar.legend(colRamp, range(igraph::E(block.G)$weight))
   }
   
   if(type=="membership"){

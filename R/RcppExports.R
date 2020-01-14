@@ -2,16 +2,21 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #' @rdname auxfuns
-.approxB <- function(y, d_id, pi_mat) {
-    .Call('_NetMix_approxB', PACKAGE = 'NetMix', y, d_id, pi_mat)
+approxB <- function(y, d_id, pi_mat) {
+    .Call(`_NetMix_approxB`, y, d_id, pi_mat)
 }
 
 #' @rdname auxfuns
-.getZ <- function(pi_mat) {
-    .Call('_NetMix_getZ', PACKAGE = 'NetMix', pi_mat)
+getZ <- function(pi_mat) {
+    .Call(`_NetMix_getZ`, pi_mat)
 }
 
-#' @name .mmsbm_fit
+#' @rdname auxfuns
+alphaLB <- function(par, tot_nodes, c_t, x_t, s_mat, t_id, var_beta, mu_beta) {
+    .Call(`_NetMix_alphaLB`, par, tot_nodes, c_t, x_t, s_mat, t_id, var_beta, mu_beta)
+}
+
+#' @name mmsbm_fit
 #' @title Fitter Function for dynamic MMSBM Model
 #' 
 #' @description This is the interface to the C++ fitter for the dynamic mixed-membership
@@ -38,10 +43,10 @@
 #'          This function is for internal use only. End-users should always resort to \code{\link{mmsbm}}.
 #'          In particular, that interface post-processes the return value of this internal in important ways. 
 #'          
-#' @author Kosuke Imai (imai@@harvard.edu), Tyler Pratt (tyler.pratt@@yale.edu), Santiago Olivella (olivella@@unc.edu)
+#' @author Santiago Olivella (olivella@@unc.edu), Adeline Lo (adelinel@@princeton.edu), Tyler Pratt (tyler.pratt@@yale.edu), Kosuke Imai (imai@@harvard.edu)
 NULL
 
-.mmsbm_fit <- function(z_t, x_t, y, time_id_dyad, time_id_node, nodes_per_period, node_id_dyad, mu_b, var_b, phi_init, kappa_init_t, b_init_t, beta_init, gamma_init, control) {
-    .Call('_NetMix_mmsbm_fit', PACKAGE = 'NetMix', z_t, x_t, y, time_id_dyad, time_id_node, nodes_per_period, node_id_dyad, mu_b, var_b, phi_init, kappa_init_t, b_init_t, beta_init, gamma_init, control)
+mmsbm_fit <- function(z_t, x_t, y, time_id_dyad, time_id_node, nodes_per_period, node_id_dyad, mu_b, var_b, mu_beta, var_beta, mu_gamma, var_gamma, phi_init, kappa_init_t, b_init_t, beta_init, gamma_init, control) {
+    .Call(`_NetMix_mmsbm_fit`, z_t, x_t, y, time_id_dyad, time_id_node, nodes_per_period, node_id_dyad, mu_b, var_b, mu_beta, var_beta, mu_gamma, var_gamma, phi_init, kappa_init_t, b_init_t, beta_init, gamma_init, control)
 }
 

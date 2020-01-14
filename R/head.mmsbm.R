@@ -9,11 +9,11 @@
 #' @param t.correct Logical; indicates whether latent group memberships should be corrected for temporal trends.  If TRUE, the function returns the node-time period units with highest estimated membership in each latent group.  
 #' @param ... Currently ignored
 #'     
-#' @return List of length \code{n.groups}.  Each entry contains a sorted vector of average latent membership probabilities of length \code{n}.
+#' @return List of length \code{n.blocks}.  Each entry contains a sorted vector of average latent membership probabilities of length \code{n}.
 #
 #' @method head mmsbm
 #'
-#' @author Kosuke Imai (imai@@harvard.edu), Tyler Pratt (tyler.pratt@@yale.edu), Santiago Olivella (olivella@@unc.edu)
+#' @author Santiago Olivella (olivella@@unc.edu), Adeline Lo (aylo@@wisc.edu), Tyler Pratt (tyler.pratt@@yale.edu), Kosuke Imai (imai@@harvard.edu)
 #' 
 #' @examples 
 #' library(NetMix)
@@ -29,7 +29,9 @@
 #'                       nodeID = "Lawyer",
 #'                       data.dyad = lazega_dyadic,
 #'                       data.monad = lazega_monadic,
-#'                       n.blocks = 2)
+#'                       n.blocks = 2,
+#'                       mmsbm.control = list(seed = 123,
+#'                                            hessian = FALSE))
 #' 
 #' ## Show top 6 lawyers in each estimated latent block
 #' head(lazega_mmsbm)

@@ -1,7 +1,7 @@
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
 
 //' @rdname auxfuns
-// [[Rcpp::export(.approxB)]]
+// [[Rcpp::export(approxB)]]
 Rcpp::NumericMatrix approxB(Rcpp::NumericVector y,
                             Rcpp::IntegerMatrix d_id,
                             Rcpp::NumericMatrix pi_mat)
@@ -30,12 +30,12 @@ Rcpp::NumericMatrix approxB(Rcpp::NumericVector y,
 }
 
 //' @rdname auxfuns
-//[[Rcpp::export(.getZ)]]
+//[[Rcpp::export(getZ)]]
 Rcpp::IntegerMatrix getZ(Rcpp::NumericMatrix pi_mat)
 {
   int NROW = pi_mat.nrow();
   int NCOL = pi_mat.ncol();
-  int mflag, bloc;
+  int mflag, bloc; 
   double u, acc;
   Rcpp::NumericVector cprob(NROW); 
   Rcpp::IntegerMatrix res(NROW, NCOL);
@@ -51,4 +51,51 @@ Rcpp::IntegerMatrix getZ(Rcpp::NumericMatrix pi_mat)
   }
   return(res);
 }
+
+//' @rdname auxfuns
+// [[Rcpp::export(alphaLB)]]
+double alphaLB(arma::vec par,
+               arma::uvec tot_nodes,
+               arma::umat c_t, 
+               arma::mat x_t,
+               arma::umat s_mat,
+               arma::uvec t_id,
+               arma::cube var_beta,
+               arma::cube mu_beta)
+{
+  arma::uword N_NODE = x_t.n_cols, N_BLK = c_t.n_rows,
+    N_MONAD_PRED = x_t.n_rows,  N_STATE = s_mat.n_rows;
+  double linpred = 0.0, row_sum = 0.0, res = 0.0, res_int = 0.0;
+  for(arma::uword m = 0; m < N_STATE; ++m){
+    for(arma::uword p = 0; p < N_NODE; ++p){
+      row_sum = 0.0;
+      res_int = 0.0;
+      for(arma::uword g = 0; g < N_BLK; ++g){
+        linpred = 0.0;
+        for(arma::uword x = 0; x < N_MONAD_PRED; ++x){
+          linpred += x_t(x, p) * par[x + N_MONAD_PRED * (g + N_BLK * m)];
+        }
+        linpred = exp(linpred);
+        row_sum += linpred;
+        res_int += (lgamma(linpred + c_t(g, p)) - lgamma(linpred));
+      }
+      res_int += (lgamma(row_sum) - lgamma(row_sum + tot_nodes[p]));
+      res += res_int * s_mat(m, t_id[p]);
+    }
+  }
+  
+  // Prior for beta
+  for(arma::uword m = 0; m < N_STATE; ++m){
+    for(arma::uword g = 0; g < N_BLK; ++g){
+      for(arma::uword x = 0; x < N_MONAD_PRED; ++x){
+        res -= 0.5 * pow(par[x + N_MONAD_PRED * (g + N_BLK * m)] - mu_beta(x, g, m), 2.0) / var_beta(x, g, m);
+      }
+    } 
+  }
+  
+  
+  return -res;
+}
+
+
 

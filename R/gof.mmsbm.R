@@ -31,8 +31,7 @@
 #'
 #' @return A \code{ggplot} object.
 #'    
-#' @author Kosuke Imai (imai@@harvard.edu), Tyler Pratt (tyler.pratt@@yale.edu), Santiago Olivella (olivella@@unc.edu)
-#' 
+#' @author Santiago Olivella (olivella@@unc.edu), Adeline Lo (aylo@@wisc.edu), Tyler Pratt (tyler.pratt@@yale.edu), Kosuke Imai (imai@@harvard.edu)
 #' @examples 
 #' library(NetMix)
 #' ## Load datasets
@@ -40,19 +39,20 @@
 #' data("lazega_monadic")
 #' 
 #' ## Estimate model with 2 groups
-#' set.seed(123)
 #' lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
 #'                       senderID = "Lawyer1",
 #'                       receiverID = "Lawyer2",
 #'                       nodeID = "Lawyer",
 #'                       data.dyad = lazega_dyadic,
 #'                       data.monad = lazega_monadic,
-#'                       n.blocks = 2)
+#'                       n.blocks = 2,
+#'                       mmsbm.control = list(seed = 123,
+#'                                            hessian = FALSE))
 #' 
 #' ## Plot observed (red) and simulated (gray) distributions over 
-#' ## geodesic distances
+#' ## indegrees
 #' ## (typically a larger number of samples would be taken) 
-#' gof(lazega_mmsbm, gof_stat = "Geodesics", samples = 2)
+#' gof(lazega_mmsbm, gof_stat = "Indegree", samples = 2)
 #'
 
 gof <- function (x, ...) {
@@ -79,10 +79,10 @@ gof.mmsbm <- function(x,
   if((length(gof_stat) == 1) && (gof_stat == "all")){
     gof_stat <- c("Geodesics","3-Motifs", "Dyad Shared Partners", "Edge Shared Partners", "Indegree","Outdegree","Degree","Incoming K-stars")
   }
-  if(x$directed & ("Degree"%in%gof_stat)){
+  if(x$forms$directed & ("Degree"%in%gof_stat)){
     gof_stat <- c(gof_stat[-which(gof_stat=="Degree")],"Indegree","Outdegree")
   }
-  if(any(c("Outdegree","Indegree","3-Motifs")%in%gof_stat) & !x$directed){
+  if(any(c("Outdegree","Indegree","3-Motifs")%in%gof_stat) & !x$forms$directed){
     stop("Requested statistic not meaningful for undirected networks.")
   }
   if(any(c("Dyad Shared Partners", "Edge Shared Partners","Incoming K-stars")%in%gof_stat)){
@@ -151,7 +151,7 @@ gof.mmsbm <- function(x,
       tid <- "(tid)"
       new.data.dyad[,tid] <- 1
     } else {
-      tid <- x$forms$tid
+      tid <- x$forms$t_id_d
     }
     var_names <- c(with(x$forms, c(senderID, receiverID)), tid)
     new_y <- new.data.dyad[, all.vars(x$forms$formula.dyad)[1]]
@@ -171,13 +171,13 @@ gof.mmsbm <- function(x,
                    lapply(seq.int(length(unique(x_full[,3]))),
                           function(y){
                             x_sub_y <- x_sub[x_sub[,3]==y, c(1,2)]
-                            igraph::graph_from_edgelist(as.matrix(x_sub_y), x$directed)
+                            igraph::graph_from_edgelist(as.matrix(x_sub_y), x$forms$directed)
                           })
                  })
   el_obs_list <- split.data.frame(el_obs, el_obs[,3])
   net_obs <- lapply(el_obs_list,
                     function(y){
-                      igraph::graph_from_edgelist(as.matrix(y[,c(1, 2)]), x$directed)
+                      igraph::graph_from_edgelist(as.matrix(y[,c(1, 2)]), x$forms$directed)
                     })
   ## Compute for simulated nets
   sim_stats_l <- lapply(gof_stat, gof_getter, nets = unlist(nets_sim, recursive = FALSE), fm = x)
