@@ -34,6 +34,7 @@
 #'                       data.monad = lazega_monadic,
 #'                       n.blocks = 2,
 #'                       mmsbm.control = list(seed = 123, 
+#'                                            conv_tol = 1e-2, 
 #'                                            hessian = FALSE))
 #' 
 #' ## Compute effect of decreasing every lawyers' age by 10 years
@@ -44,13 +45,13 @@
 
 
 covFX <- function(fm, cov, shift, max.val=FALSE){
-  predict.ties <- predict(fm, parametric_mm = TRUE, type="response")
+  predict.ties <- predict(fm, type="response")
   monadic.data2 <- fm$monadic.data
   monadic.data2[,cov] <- fm$monadic.data[,cov] + shift
   if(!isFALSE(max.val)){
     monadic.data2[which(fm$monadic.data[,cov] == max(fm$monadic.data[,cov])),cov] <- max.val
   }
-  predict.ties2 <- predict(fm, new.data.monad=monadic.data2, parametric_mm = TRUE, type="response")
+  predict.ties2 <- predict(fm, new.data.monad=monadic.data2, type="response")
   FX <- list(mean(predict.ties2 - predict.ties), #avg
              tapply(predict.ties2-predict.ties, fm$dyadic.data[,"(tid)"], mean), #time
              sapply(unique(fm$monadic.data[,"(nid)"]), function(x){ #node

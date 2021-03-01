@@ -10,7 +10,6 @@
   seed = NULL,
   new.data.dyad = NULL,
   new.data.monad = NULL,
-  parametric_mm = FALSE,
   ...
 )
 }
@@ -25,10 +24,6 @@
 dyadic predictor values instead of those used to fit the original model.}
 
 \item{new.data.monad}{An optional \code{data.frame} object. See \code{new.data.dyad}.}
-
-\item{parametric_mm}{Boolean. Should the variational posterior be used for sampling the mixed-memberships (\code{FALSE}), 
-or should the mixed-meberships be formed using the parameters in the monadic regression equation (\code{TRUE})?
-Defaults to \code{FALSE}. If \code{is.null(new.data.monad)=FALSE}, setting this to \code{FALSE} will produce an error.}
 
 \item{...}{Currently ignored}
 }
@@ -56,6 +51,7 @@ lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
                       data.monad = lazega_monadic,
                       n.blocks = 2,
                       mmsbm.control = list(seed = 123, 
+                                           conv_tol = 1e-2,
                                            hessian = FALSE))
 
 ## Simulate 5 new networks

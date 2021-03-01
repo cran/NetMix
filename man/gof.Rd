@@ -14,7 +14,6 @@ gof(x, ...)
   samples = 50,
   new.data.dyad = NULL,
   new.data.monad = NULL,
-  parametric_mm = FALSE,
   seed = NULL,
   ...
 )
@@ -34,8 +33,6 @@ gof(x, ...)
 \item{new.data.dyad}{See \code{\link{simulate.mmsbm}}. Enables out-of-sample checking.}
 
 \item{new.data.monad}{See \code{\link{simulate.mmsbm}}. Enables out-of-sample checking.}
-
-\item{parametric_mm}{See \code{\link{simulate.mmsbm}}.}
 
 \item{seed}{See \code{\link{simulate.mmsbm}}.}
 }
@@ -76,12 +73,17 @@ lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
                       data.monad = lazega_monadic,
                       n.blocks = 2,
                       mmsbm.control = list(seed = 123,
+                                           conv_tol = 1e-2,
                                            hessian = FALSE))
 
 ## Plot observed (red) and simulated (gray) distributions over 
 ## indegrees
 ## (typically a larger number of samples would be taken) 
+## (strictly requires ggplot2)
+
+\donttest{
 gof(lazega_mmsbm, gof_stat = "Indegree", samples = 2)
+}
 
 }
 \author{

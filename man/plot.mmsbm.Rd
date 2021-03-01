@@ -4,7 +4,7 @@
 \alias{plot.mmsbm}
 \title{Various visualization tools for 'mmsbm' objects}
 \usage{
-\method{plot}{mmsbm}(x, type = "groups", FX = NULL, ...)
+\method{plot}{mmsbm}(x, type = "groups", FX = NULL, node = NULL, ...)
 }
 \arguments{
 \item{x}{An object of class \code{mmsbm}, a result of a call to \code{mmsbm}.}
@@ -17,6 +17,8 @@ each latent group by time period. "\code{effect}" provides a series of plots sho
 of a shfit in monadic covariate values.}
 
 \item{FX}{with \code{type == "effect"}; a list resulting from a call to \code{covFX}.}
+
+\item{node}{with \code{type == "membership"}; a character string specifying the node for which group membership should be plotted.}
 
 \item{...}{Currently ignored}
 }
@@ -41,6 +43,7 @@ lazega_mmsbm <- mmsbm(SocializeWith ~ Coworkers,
                       data.monad = lazega_monadic,
                       n.blocks = 2,
                       mmsbm.control = list(seed = 123,
+                                           conv_tol = 1e-2,
                                            hessian = FALSE))
 
 ## Plot blockmodel as network
