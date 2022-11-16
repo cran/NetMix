@@ -1,4 +1,4 @@
-1a5f55915bbbb1d08f96c79de7a186af *DESCRIPTION
+cd2ab03217727a9a1d94ebf2f4432302 *DESCRIPTION
 d4fa8c221af86b649ab4f20aaf910f58 *NAMESPACE
 5766ca3ca2733e728fab4ed502a4daf5 *NEWS
 698ee38788af4b1c76f2f818c21232a3 *R/RcppExports.R
@@ -15,8 +15,8 @@ fc4640dab9bb775ec7f15eff3b11213a *R/simulate.mmsbm.R
 6bb3cecbbe546e593481cdf6db60aafc *R/summary.mmsbm.R
 b3e547dc943bbf44014219c7802baa81 *R/vcov.mmsbm.R
 4251a9dd09dd8783c10b12fff6dabbfc *README.md
-611140cb00a4e63afbe18f78d868bc57 *data/lazega_dyadic.RData
-5ccba9677072625990ea85be23fcfd31 *data/lazega_monadic.RData
+18189ee66a9593b4c8c1e813da98a95d *data/lazega_dyadic.RData
+cbfae172a059177de3814bc4353c7f8d *data/lazega_monadic.RData
 a5de9fc4d77e298c972a44af0e034088 *man/auxfuns.Rd
 08a440ca1cdca190ea1f2fd732be434b *man/coef.mmsbm.Rd
 883633cf28fdecdbbb3aed5fc16d96a8 *man/covFX.Rd
@@ -34,7 +34,7 @@ afa4dc07ba00987290521330df66de90 *man/predict.mmsbm.Rd
 383d22c6afdaf815512c75d68b8ed656 *src/AuxFuns.cpp
 ad71b7153c02c3cc8a71559fdb2f038e *src/AuxFuns.h
 dfbc6dd2b5ef15ba5f2bebe49b2dc7a7 *src/AuxFunsForR.cpp
-bc4b2d24c9f3dac5208d8d756e5b4484 *src/MMModelClass.cpp
+2103637c95ed073ac09ab078d208c042 *src/MMModelClass.cpp
 2ac700804cedf9d7958d6788d456c333 *src/MMModelClass.h
 f2b998e7502a2fe00b04f03258e6293b *src/Makevars
 ee4d3acf32bc5b7fc5333156f8fd6f64 *src/Makevars.win
