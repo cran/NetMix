@@ -1,8 +1,8 @@
 Package: NetMix
 Type: Package
 Title: Dynamic Mixed-Membership Network Regression Model
-Version: 0.2.0.1
-Date: 2021-03-01
+Version: 0.2.0.2
+Date: 2023-12-11
 Encoding: UTF-8
 Author: Santiago Olivella [aut, cre],
   Adeline Lo [aut, cre],
@@ -22,8 +22,7 @@ Description: Stochastic collapsed variational inference on mixed-membership stoc
 BugReports: https://github.com/solivella/NetMix/issues
 NeedsCompilation: yes
 License: GPL (>= 2)
-Depends: R (>= 3.5.0)
-SystemRequirements: C++11
+Depends: R (>= 4.1.0)
 Suggests: ergm (>= 3.9.4), ggplot2 (>= 3.1.1), network (>= 1.13),
         scales (>= 1.0.0)
 Imports: clue (>= 0.3-58), graphics (>= 3.5.2), grDevices (>= 3.5.2),
@@ -32,6 +31,6 @@ Imports: clue (>= 0.3-58), graphics (>= 3.5.2), grDevices (>= 3.5.2),
         (>= 1.0.1), Rcpp (>= 1.0.2), stats (>= 3.5.2), utils (>= 3.5.2)
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
-Packaged: 2022-11-16 15:59:38 UTC; hornik
+Packaged: 2023-12-12 04:13:09 UTC; olivella
 Repository: CRAN
-Date/Publication: 2022-11-16 16:34:41 UTC
+Date/Publication: 2023-12-13 19:50:02 UTC
